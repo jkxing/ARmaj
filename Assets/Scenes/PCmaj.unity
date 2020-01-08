@@ -743,8 +743,21 @@ MonoBehaviour:
   fulu_positions: []
   rotations: []
   fulu_rotations: []
+  pushedCardPos: []
   timer: 2
   cnt: 0
+  currentPlayer: 0
+  time: 0
+  chi: 0
+  peng: 0
+  gang: 0
+  he: 0
+  lizhi: 0
+  lizhi_state: 
+  score_list: 
+  rank_list: 
+  playing: 0
+  round: 0
 --- !u!1 &2129104974
 GameObject:
   m_ObjectHideFlags: 0

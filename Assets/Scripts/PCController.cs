@@ -161,6 +161,11 @@ public class PCController : MonoBehaviour
     {
         if (tim == 0)
         {
+            if (Server.Players.Count > player)
+            {
+                AudioInfo x = new AudioInfo();
+                Server.Players[player].Send(MessageType.AudioInfo, NetworkUtils.Serialize(x));
+            }
             for (int i = 0; i < id.Length; i++)
             {
                 cards[id[i]].transform.GetComponent<BoxCollider>().enabled = true;

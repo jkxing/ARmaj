@@ -13,6 +13,7 @@ namespace Multiplay
         Ready,        //客户端ready
         GameInfo,        //局面信息
         CardInfo,        //牌面信息
+        AudioInfo,
     }
     [Serializable]
     public class GameInfo
@@ -41,5 +42,10 @@ namespace Multiplay
     public class Ready
     {
         public bool ready;
+    }
+    [Serializable]
+    public class AudioInfo
+    {
+        public int player;
     }
 }
