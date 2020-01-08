@@ -37,11 +37,11 @@ public class MajPrefab : MonoBehaviour
         CardsRotation = new Quaternion[CARD_NUM];
         for (int i = 0; i < CARD_NUM; i++)
         {
-            cards[i] = Instantiate(cards_prefab[i / 4]);
-            cards[i].transform.GetComponent<BoxCollider>().enabled = false;
-            cards[i].transform.GetComponent<Rigidbody>().freezeRotation = true;
-            cards[i].transform.GetComponent<Rigidbody>().useGravity = false;
+            cards[i] = Instantiate(cards_prefab[i / 4], new Vector3(0,-10000,0), Quaternion.Euler(0,0,0));
+            Destroy(cards[i].GetComponent<BoxCollider>());
+            Destroy(cards[i].GetComponent<Rigidbody>());
             cards[i].transform.parent = this.transform;
+            CardsPosition[i].y = -10000f;
         }
         /*for (int i = 0; i < 14; i++)
         {
@@ -108,19 +108,20 @@ public class MajPrefab : MonoBehaviour
         FrameUpperLeft.SetActive(true);
         FrameUpperRight.SetActive(true);
 
-        float s = Math.Min(Image.ExtentX, Image.ExtentZ) * 0.012f;
+        float s = Math.Min(Image.ExtentX, Image.ExtentZ) * 0.01f;
         for(int i = 0; i < CARD_NUM; i++)
         {
             cards[i].transform.localScale = new Vector3(s, s, s);
-            cards[i].transform.localPosition = (CardsPosition[i].x * halfWidth * Vector3.right) + (halfHeight * CardsPosition[i].z * Vector3.forward) + new Vector3(0f,0.02f,0f);
+            cards[i].transform.localPosition = (CardsPosition[i].x * halfWidth * Vector3.right) + (halfHeight * CardsPosition[i].z * Vector3.forward) + CardsPosition[i].y*new Vector3(0f,1f,0f);
             cards[i].transform.localRotation = CardsRotation[i];
         }
     }
-
-    public void parse(GameInfo result)
+    public static int x = 0;
+    public void parse(CardInfo result)
     {
         int len = result.changeList.Length;
         //Info.Instance.Print("parse game len is "+ len.ToString(), true);
+        Info.Instance.Print("try to parse game len is " + len + " id is " + (++x).ToString(), true);
         for (int i = 0; i < len; i++)
         {
             CardsPosition[result.changeList[i]].x = result.positionx[i];

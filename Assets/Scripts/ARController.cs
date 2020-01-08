@@ -36,37 +36,10 @@ public class ARController : MonoBehaviour
     public bool ready = false;
     public bool playing = false;
     public bool Connected = false;
-    public float remain_time = 30f;
-    public void changeUI()
-    {
-        if (Connected)
-        {
-            GameObject.Find("Canvas/Connected/Text").GetComponent<Text>().text = "已连接";
-        }
-        else
-        {
-            GameObject.Find("Canvas/Connected/Text").GetComponent<Text>().text = "未连接";
-        }
-        if (ready)
-        {
-            GameObject.Find("Canvas/Image/Text").GetComponent<Text>().text = "已准备";
-        }
-        else
-        {
-            GameObject.Find("Canvas/Image/Text").GetComponent<Text>().text = "准备";
-        }
-        if (playing)
-        {
-            GameObject.Find("Canvas/Image").SetActive(false);
-        }
-        else
-        {
-            GameObject.Find("Canvas/Image").SetActive(true);
-        }
-    }
+    private int myId = -1;
     public void Update()
     {
-        changeUI();
+        GameObject.Find("Canvas/Connected/Text").GetComponent<Text>().text = "My id:" + myId.ToString();
         // Exit the app when the 'back' button is pressed.
         if (Input.GetKey(KeyCode.Escape))
         {
@@ -127,6 +100,7 @@ public class ARController : MonoBehaviour
     public Text time_left;
     public void parse(GameInfo result)
     {
+        myId = result.yourPlayer;
         if (result.currentPlayer == result.yourPlayer)
         {
             he.SetActive(result.he);
@@ -137,10 +111,20 @@ public class ARController : MonoBehaviour
             time_left_box.SetActive(true);
             time_left.text = result.time.ToString();
         }
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             playerId[i].text = result.rank_list[i].ToString();
             playerScore[i].text = result.score_list[i].ToString();
+            if(result.rank_list[i] == myId)
+            {
+                playerId[i].color = Color.red;
+                playerScore[i].color = Color.red;
+            }
+            else
+            {
+                playerId[i].color = Color.black;
+                playerScore[i].color = Color.black;
+            }
         }
     }
 }

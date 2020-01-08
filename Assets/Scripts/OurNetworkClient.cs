@@ -4,6 +4,7 @@ using Multiplay;
 public class OurNetworkClient : MonoBehaviour
 {
     private OurNetworkClient() { }
+    public static int x = 0;
     public static OurNetworkClient Instance { get; private set; }
 
     /// <summary>
@@ -22,19 +23,21 @@ public class OurNetworkClient : MonoBehaviour
         if (Instance == null)
             Instance = this;
         NetworkClient.Register(MessageType.GameInfo, _GameInfo);
+        NetworkClient.Register(MessageType.CardInfo, _CardInfo);
     }
    
     private void _GameInfo(byte[] data)
     {
+        Info.Instance.Print("gameinfo parse", true);
         GameInfo result = NetworkUtils.Deserialize<GameInfo>(data);
-        GameObject.Find("Controller").GetComponent<ARController>().playing = true;
-        //Info.Instance.Print("arcontroller parse start  ", true);
         GameObject.Find("Controller").GetComponent<ARController>().parse(result);
-        //Info.Instance.Print("arcontroller parse success  ", true);
-        if (result.currentPlayer == result.yourPlayer || true)
-            GameObject.Find("Controller").GetComponent<ARController>().remain_time = result.time;
+    }
+
+    private void _CardInfo(byte[] data)
+    {
+        Info.Instance.Print("cardinfo parse", true);
+        CardInfo result = NetworkUtils.Deserialize<CardInfo>(data);
         MajPrefab obj = GameObject.Find("Controller").GetComponent<ARController>().visualizer;
-        //Info.Instance.Print("try to parse game  ", true);
         obj.parse(result);
     }
 }

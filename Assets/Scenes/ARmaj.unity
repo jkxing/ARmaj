@@ -506,7 +506,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &394620420
 RectTransform:
   m_ObjectHideFlags: 0
@@ -600,7 +600,7 @@ MonoBehaviour:
   ready: 0
   playing: 0
   Connected: 0
-  remain_time: 30
+  myId: 0
   he: {fileID: 158264645}
   lizhi: {fileID: 427606473}
   chi: {fileID: 1579490616}

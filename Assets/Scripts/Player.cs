@@ -7,6 +7,7 @@ public class Player
     public Player(Socket socket, int id)
     {
         Socket = socket;
+        Socket.NoDelay = true;
         this.id = id;
     }
 }
