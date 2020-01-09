@@ -18,7 +18,15 @@ public class PCController : MonoBehaviour
     public Vector3[] fulu_rotations;
     public Vector3[] pushedCardPos;
 
-    public float timer = 2f;
+    public int[] cardDesk;
+    public int front, tail;
+    public int currentPlayer = 0;
+    public int[,] handCard;
+    public int[] currentCard;
+    public bool okPlay = false;
+    public int[] playNum;
+
+    public float timer = 4f;
     public int cnt = 0;
     Network network;
     // Start is called before the first frame update
@@ -83,12 +91,74 @@ public class PCController : MonoBehaviour
             cards[i].transform.GetComponent<Rigidbody>().freezeRotation = true;
             cards[i].transform.GetComponent<Rigidbody>().mass = 1000000;
         }
+        initCard();
         network = new Network("10.0.0.8");
         /*for test*/
         StartCoroutine(startSimulation());
         StartCoroutine(sendCardStatus());
         StartCoroutine(sendInfoStatus());
     }
+
+    public void initCard()
+    {
+        cardDesk = new int[CARD_NUM];
+        for (int i = 0; i < CARD_NUM; ++i)
+            cardDesk[i] = i;
+        for (int i = 1; i < CARD_NUM; ++i)
+        {
+            System.Random r1 = new System.Random();
+            int a = r1.Next(0, i);
+            int t = cardDesk[a];
+            cardDesk[a] = cardDesk[i];
+            cardDesk[i] = t;
+        }
+        handCard = new int[4,13];
+        currentCard = new int[14];
+        playNum = new int[4];
+        playNum[0] = playNum[1] = playNum[2] = playNum[3] = 0;
+        for (int i = 0; i < 4; ++i)
+        {
+            int[] id = new int[13];
+            for (int j = 0; j < 13; ++j) id[j] = handCard[i,j] = cardDesk[i * 13 + j];
+            updateHandCard(i, id);
+        }
+        front = 53;
+        tail = 123;
+    }
+
+    public void assignCard()
+    {
+        if (front == tail)
+            return;
+
+        int lastPlayer = (currentPlayer + 3) % 4;
+        int[] id = new int[13];
+        for (int i = 0; i < 13; ++i) id[i] = handCard[lastPlayer, i];
+        updateHandCard(lastPlayer, id);
+
+        for (int i = 0; i < 13; ++i) currentCard[i] = handCard[currentPlayer,i];
+        currentCard[13] = cardDesk[front++];
+        updateHandCard(currentPlayer, currentCard);
+        okPlay = true;
+    }
+
+    public void playCard()
+    {
+        if (!okPlay) return;
+        System.Random r1 = new System.Random();
+        int a = r1.Next(0, 14);
+        int index = currentCard[a];
+        for (int i = 0; i < 14; ++i)
+            if (i > a)
+                handCard[currentPlayer, i - 1] = currentCard[i];
+            else
+                handCard[currentPlayer, i] = currentCard[i];
+        throwCard(index, currentPlayer, playNum[currentPlayer]);
+        playNum[currentPlayer]++;
+        currentPlayer = (currentPlayer + 1) % 4;
+        okPlay = false;
+    }
+
     //player and his handcard
     public void updateHandCard(int playerId, int[] idlist)
     {
@@ -112,6 +182,17 @@ public class PCController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+    	timer -= Time.deltaTime;
+    	if(timer < 2f && !okPlay)
+        {
+            assignCard();
+        }
+        if (timer < 0)
+        {
+            playCard();
+            timer = 4f;
+        }
+
         if (Server.Players.Count > 0)
         {
             playing = true;
