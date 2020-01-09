@@ -44,7 +44,7 @@ public class OurNetworkClient : MonoBehaviour
 
     private void _AudioInfo(byte[] data)
     {
-        Info.Instance.Print("cardinfo parse", true);
+        Info.Instance.Print("audioinfo parse", true);
         AudioInfo result = NetworkUtils.Deserialize<AudioInfo>(data);
         MajPrefab obj = GameObject.Find("Controller").GetComponent<ARController>().visualizer;
         obj.table.transform.Find("audio").GetComponent<AudioSource>().Play();

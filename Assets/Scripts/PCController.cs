@@ -81,6 +81,7 @@ public class PCController : MonoBehaviour
             cards[i] = Instantiate(cards_prefab[i / 4], new Vector3(-1f, -1f, -1f), Quaternion.Euler(0f, 0f, 0f));
             cards[i].transform.localScale = new Vector3(0.0065f, 0.0065f, 0.0065f);
             cards[i].transform.GetComponent<Rigidbody>().freezeRotation = true;
+            cards[i].transform.GetComponent<Rigidbody>().mass = 1000000;
         }
         network = new Network("10.0.0.8");
         /*for test*/
@@ -133,6 +134,7 @@ public class PCController : MonoBehaviour
 
     public void throwCard(int player, int index, int pos)
     {
+        cards[index].transform.GetComponent<Rigidbody>().mass = 1;
         cards[index].transform.GetComponent<Rigidbody>().freezeRotation = false;
         cards[index].transform.position += new Vector3(0f, 0.1f, 0f);
         Vector3 force = pushedCardPos[30 * player + pos] - cards[index].transform.position;
@@ -201,6 +203,7 @@ public class PCController : MonoBehaviour
         cards[index].transform.position = pushedCardPos[30 * player + pos];
         cards[index].transform.rotation = Quaternion.Euler(fulu_rotations[14 * player].x, fulu_rotations[14 * player].y, fulu_rotations[14 * player].z);
         cards[index].transform.GetComponent<Rigidbody>().freezeRotation = true;
+        cards[index].transform.GetComponent<Rigidbody>().mass = 1000000;
     }
 
     public IEnumerator sendCardStatus()
