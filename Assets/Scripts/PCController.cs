@@ -20,7 +20,6 @@ public class PCController : MonoBehaviour
 
     public int[] cardDesk;
     public int front, tail;
-    public int currentPlayer = 0;
     public int[,] handCard;
     public int[] currentCard;
     public bool okPlay = false;
@@ -55,13 +54,13 @@ public class PCController : MonoBehaviour
         rank_list = new int[4];
         for (int i = 0; i < 14; i++)
         {
-            positions[i] = new Vector3(0.7f, 0.04f, -0.35f + i * 0.05f);
+            positions[i] = new Vector3(0.7f, 0.034f, -0.35f + i * 0.05f);
             rotations[i] = new Vector3(-90f, 0f, -90f);
-            positions[i + 28] = new Vector3(-0.7f, 0.04f, 0.35f - i * 0.05f);
+            positions[i + 28] = new Vector3(-0.7f, 0.034f, 0.35f - i * 0.05f);
             rotations[i + 28] = new Vector3(-90f, 0f, 90f);
-            positions[i + 14] = new Vector3(0.35f - i * 0.05f, 0.04f, 0.7f);
+            positions[i + 14] = new Vector3(0.35f - i * 0.05f, 0.034f, 0.7f);
             rotations[i + 14] = new Vector3(90f, 0f, 0f);
-            positions[i + 42] = new Vector3(-0.35f + i * 0.05f, 0.04f, -0.7f);
+            positions[i + 42] = new Vector3(-0.35f + i * 0.05f, 0.034f, -0.7f);
             rotations[i + 42] = new Vector3(-90f, 0f, 0f);
 
             fulu_positions[i] = new Vector3(0.95f, 0.04f, 0.95f - i * 0.05f);
@@ -78,22 +77,24 @@ public class PCController : MonoBehaviour
         {
             int c = i % 6;
             int r = i / 6;
-            pushedCardPos[i] = new Vector3(0.3f + r * 0.07f, 0.05f, -0.15f + c * 0.05f);
-            pushedCardPos[i + 60] = new Vector3(-0.3f - r * 0.07f, 0.05f, 0.15f - c * 0.05f);
-            pushedCardPos[i + 30] = new Vector3(0.15f - c * 0.05f, 0.05f, 0.3f + r * 0.07f);
-            pushedCardPos[i + 90] = new Vector3(-0.15f + c * 0.05f, 0.05f, -0.3f - r * 0.07f);
+            pushedCardPos[i] = new Vector3(0.3f + r * 0.07f, 0.03f, -0.15f + c * 0.05f);
+            pushedCardPos[i + 60] = new Vector3(-0.3f - r * 0.07f, 0.03f, 0.15f - c * 0.05f);
+            pushedCardPos[i + 30] = new Vector3(0.15f - c * 0.05f, 0.03f, 0.3f + r * 0.07f);
+            pushedCardPos[i + 90] = new Vector3(-0.15f + c * 0.05f, 0.03f, -0.3f - r * 0.07f);
         }
 
         for (int i = 0; i < CARD_NUM; i++)
         {
-            cards[i] = Instantiate(cards_prefab[i / 4], new Vector3(-1f, -1f, -1f), Quaternion.Euler(0f, 0f, 0f));
+            cards[i] = Instantiate(cards_prefab[i / 4], new Vector3(-1f, -5f-i, -1f), Quaternion.Euler(0f, 0f, 0f));
             cards[i].transform.localScale = new Vector3(0.0065f, 0.0065f, 0.0065f);
             cards[i].transform.GetComponent<Rigidbody>().freezeRotation = true;
+            cards[i].transform.GetComponent<Rigidbody>().useGravity = false;
+            cards[i].transform.GetComponent<Rigidbody>().mass = 1000000;
         }
         initCard();
         network = new Network("10.0.0.8");
         /*for test*/
-        StartCoroutine(startSimulation());
+        //StartCoroutine(startSimulation());
         StartCoroutine(sendCardStatus());
         StartCoroutine(sendInfoStatus());
     }
@@ -150,9 +151,9 @@ public class PCController : MonoBehaviour
         for (int i = 0; i < 14; ++i)
             if (i > a)
                 handCard[currentPlayer, i - 1] = currentCard[i];
-            else
+            else if(i<a)
                 handCard[currentPlayer, i] = currentCard[i];
-        throwCard(index, currentPlayer, playNum[currentPlayer]);
+        throwCard(currentPlayer, index ,playNum[currentPlayer]);
         playNum[currentPlayer]++;
         currentPlayer = (currentPlayer + 1) % 4;
         okPlay = false;
@@ -214,6 +215,8 @@ public class PCController : MonoBehaviour
 
     public void throwCard(int player, int index, int pos)
     {
+        cards[index].transform.GetComponent<Rigidbody>().useGravity = true;
+        cards[index].transform.GetComponent<Rigidbody>().mass = 1;
         cards[index].transform.GetComponent<Rigidbody>().freezeRotation = false;
         cards[index].transform.position += new Vector3(0f, 0.1f, 0f);
         Vector3 force = pushedCardPos[30 * player + pos] - cards[index].transform.position;
@@ -282,6 +285,8 @@ public class PCController : MonoBehaviour
         cards[index].transform.position = pushedCardPos[30 * player + pos];
         cards[index].transform.rotation = Quaternion.Euler(fulu_rotations[14 * player].x, fulu_rotations[14 * player].y, fulu_rotations[14 * player].z);
         cards[index].transform.GetComponent<Rigidbody>().freezeRotation = true;
+        cards[index].transform.GetComponent<Rigidbody>().mass = 1000000;
+        cards[index].transform.GetComponent<Rigidbody>().useGravity = false;
     }
 
     public IEnumerator sendCardStatus()
