@@ -39,8 +39,11 @@ public class PCController : MonoBehaviour
     public int[] rank_list;
     public bool playing;
     public int round;
+
+    GestureDetect gestureDetect;
     void Start()
     {
+        gestureDetect = GestureDetect.Instance;
         cards = new GameObject[CARD_NUM];
         CardsPosition = new Vector3[CARD_NUM];
         CardsRotation = new Quaternion[CARD_NUM];
