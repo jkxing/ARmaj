@@ -22,6 +22,7 @@ public class GestureDetect : MonoBehaviour
     private int waitFrames = 0;
 
     private int mOperID = 0;
+    private int mGrabID = 0;
 
     [Tooltip("Velocity (m/s) move toward ")]
 
@@ -58,17 +59,30 @@ public class GestureDetect : MonoBehaviour
 
     }
 
+    private int PositionToID(Vector pos)
+    {
+        int res = 0;
+        res = (int)((pos.x + 0.35f) / 0.05f);
+        if (res < 0)
+            return 0;
+        if (res >= 14)
+            return 13;
+        return res;
+    }
+
     public int GrabID
     {
         get
         {
-            int res = 0;
-            res = (int)((resultPosition.x + 0.35f) / 0.05f);
-            if (res < 0)
-                return 0;
-            if (res >= 14)
-                return 13;
-            return res;
+            return mGrabID;
+        }
+
+        private set
+        {
+            if(value == mGrabID)
+                return;
+            mGrabID = value;
+            OnGrabIDChange?.Invoke(value);
         }
     }
 
@@ -94,6 +108,7 @@ public class GestureDetect : MonoBehaviour
 
     // 监听新操作的ID变化
     public event OnOperIDChangeDelegate OnVariableChange;
+    public event OnOperIDChangeDelegate OnGrabIDChange;
 
     public bool IsGrabRightHand()
     {
@@ -285,18 +300,16 @@ public class GestureDetect : MonoBehaviour
         } 
         else
         {
+            if(mRightHand != null) 
+            {
+                //grabPosition = mRightHand.PalmPosition;
+                mGrabID = PositionToID(mRightHand.PalmPosition);
+            }
+
             if (IsGrabRightHand())
             {
-                if (!choose)
-                {
-                    if (grabPosition == Vector.Zero)
-                    {
-                        grabPosition = mRightHand.PalmPosition;
-                    }
-
-                    validFrames[(int)OperType.CHOOSE]++;
-                }
-
+                //grabPosition = mRightHand.PalmPosition;
+                validFrames[(int)OperType.CHOOSE]++;
             }
             else if (RightHandLeftNormal() && RightHandLeftSwipe())
             {

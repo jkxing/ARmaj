@@ -94,6 +94,7 @@ public class PCController : MonoBehaviour
             cards[i].transform.GetComponent<Rigidbody>().useGravity = false;
             cards[i].transform.GetComponent<Rigidbody>().mass = 1000000;
         }
+        initRound();
         initCard();
         network = new Network("10.0.0.8");
         /*for test*/
@@ -102,8 +103,21 @@ public class PCController : MonoBehaviour
         StartCoroutine(sendInfoStatus());
     }
 
+    public void initRound()
+    {
+        handCard = new int[4, 13];
+        currentCard = new int[14];
+        playNum = new int[4];
+        for (int i = 0; i < 4; ++i) 
+        {
+            rank_list[i] = i, score_list[i] = 25000;
+        }
+        round = -1;
+    }
+
     public void initCard()
     {
+        round++;
         cardDesk = new int[CARD_NUM];
         for (int i = 0; i < CARD_NUM; ++i)
             cardDesk[i] = i;
@@ -115,13 +129,12 @@ public class PCController : MonoBehaviour
             cardDesk[a] = cardDesk[i];
             cardDesk[i] = t;
         }
-        handCard = new int[4,13];
-        currentCard = new int[14];
-        playNum = new int[4];
+        
         playNum[0] = playNum[1] = playNum[2] = playNum[3] = 0;
         for (int i = 0; i < 4; ++i)
         {
             int[] id = new int[13];
+            lizhi_state[i] = false;
             for (int j = 0; j < 13; ++j) id[j] = handCard[i,j] = cardDesk[i * 13 + j];
             updateHandCard(i, id);
         }
@@ -142,7 +155,111 @@ public class PCController : MonoBehaviour
         for (int i = 0; i < 13; ++i) currentCard[i] = handCard[currentPlayer,i];
         currentCard[13] = cardDesk[front++];
         updateHandCard(currentPlayer, currentCard);
+        if (judgeHe(currentCard)) he = true;
         okPlay = true;
+    }
+
+    public void sortCard()
+    {
+        for(int i = 0; i < 13; ++i)
+            for(int j = i; j < 13; ++j)
+            {
+                if(handCard[currentPlayer, j] < handCard[currentPlayer, i])
+                {
+                    int t = handCard[currentPlayer, j];
+                    handCard[currentPlayer, j] = handCard[currentPlayer, i];
+                    handCard[currentPlayer, i] = t;
+                }
+            }
+    }
+
+    public int sum(int [] arr)
+    {
+        int tmp = 0;
+        int len = arr.Length;
+        for (int i = 0; i < len; ++i)
+        {
+            tmp += arr[i];
+        }
+        return tmp;
+    }
+
+    public bool judgeOne(int [] arr)
+    {
+        int len = arr.Length; 
+        for (int i = 0; i < len;)
+        {
+            if (arr[i] == 0)
+            {
+                ++i;        // 没有这个字的牌，找下一个字
+                continue;
+            }
+
+            if (arr[i] == 1 || arr[i] == 2 || arr[i] == 4)// 如果这个字出现了1、2、4次
+            {
+                if (i >= len - 2)// 如果后面没有牌，则一定不能胡牌
+                {
+                    return false;
+                }
+
+                if (arr[i + 1] == 0 || arr[i + 2] == 0)
+                {
+                    return false;// 如果后面的两个字，有一个是没牌的，则不能胡牌
+                }
+
+                // 后面还有至少2连续的字
+                arr[i]--;
+                arr[i + 1]--;
+                arr[i + 2]--;
+            }
+            else if (arr[i] == 3)
+            {
+                arr[i] -= 3;
+            }
+            else
+            {
+                return false;// 牌只可能出现0,1,2,3,4这几种情况
+            }
+        }
+        return (sum(arr) == 0);// 如果没有剩余的牌，则表示可以胡牌
+    }
+
+
+    public bool judgeLeft(int[] cardList)
+    {
+        int[] arr = new int[9];
+        for(int i = 0; i < 3; ++i)
+        {
+            for (int j = 0; j < 9; ++j)
+                arr[j] = cardList[i * 9 + j];
+            if (!judgeOne(arr)) return false;
+        }
+        for (int i = 27; i < 34; ++i)
+            if (cardList[i] != 0 && cardList[i] != 3)
+                return false;
+        return true;
+    }
+
+    public bool judgeHe(int [] cardList) 
+    {
+        int[] tong = new int[34];
+        for (int i = 0; i < 34; ++i)
+        {
+            tong[i] = 0;
+        }
+        for (int i = 0; i < 14; ++i)
+        {
+            tong[cardList[i] / 4]++;
+        }
+        for(int i = 0; i < 34; ++i)
+            if(tong[i] >= 2)
+            {
+                tong[i] -= 2;
+                if (judgeLeft(tong))
+                    return true;
+                tong[i] += 2;
+            }
+        return false;
     }
 
     public void playCard()
@@ -156,6 +273,7 @@ public class PCController : MonoBehaviour
                 handCard[currentPlayer, i - 1] = currentCard[i];
             else if(i<a)
                 handCard[currentPlayer, i] = currentCard[i];
+        sortCard();
         throwCard(currentPlayer, index ,playNum[currentPlayer]);
         playNum[currentPlayer]++;
         currentPlayer = (currentPlayer + 1) % 4;
