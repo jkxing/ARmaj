@@ -216,6 +216,16 @@ public class PCController : MonoBehaviour
         return Math.Abs(a.x - b.x) > 0.001 || Math.Abs(a.y - b.y) > 0.001 || Math.Abs(a.x - b.x) > 0.001 || (a.w - b.w) > 0.001;
     }
 
+    public void changeSelectId(int player, int index)
+    {
+        if (Server.Players.Count > player)
+        {
+            SelectInfo x = new SelectInfo();
+            x.id = index;
+            Server.Players[player].Send(MessageType.SelectInfo, NetworkUtils.Serialize(x));
+        }
+    }
+
     public void throwCard(int player, int index, int pos)
     {
         cards[index].transform.GetComponent<Rigidbody>().useGravity = true;

@@ -25,6 +25,7 @@ public class OurNetworkClient : MonoBehaviour
         NetworkClient.Register(MessageType.GameInfo, _GameInfo);
         NetworkClient.Register(MessageType.CardInfo, _CardInfo);
         NetworkClient.Register(MessageType.AudioInfo, _AudioInfo);
+        NetworkClient.Register(MessageType.SelectInfo, _SelectInfo);
     }
    
     private void _GameInfo(byte[] data)
@@ -48,5 +49,12 @@ public class OurNetworkClient : MonoBehaviour
         AudioInfo result = NetworkUtils.Deserialize<AudioInfo>(data);
         MajPrefab obj = GameObject.Find("Controller").GetComponent<ARController>().visualizer;
         obj.table.transform.Find("audio").GetComponent<AudioSource>().Play();
+    }
+    private void _SelectInfo(byte[] data)
+    {
+        Info.Instance.Print("audioinfo parse", true);
+        SelectInfo result = NetworkUtils.Deserialize<SelectInfo>(data);
+        MajPrefab obj = GameObject.Find("Controller").GetComponent<ARController>().visualizer;
+        obj.handleSelect(result.id);
     }
 }

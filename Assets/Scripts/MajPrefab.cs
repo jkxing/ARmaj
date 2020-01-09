@@ -112,7 +112,8 @@ public class MajPrefab : MonoBehaviour
         for(int i = 0; i < CARD_NUM; i++)
         {
             cards[i].transform.localScale = new Vector3(s, s, s);
-            cards[i].transform.localPosition = (CardsPosition[i].x * halfWidth * Vector3.right) + (halfHeight * CardsPosition[i].z * Vector3.forward) + CardsPosition[i].y*new Vector3(0f,1f,0f);
+            cards[i].transform.localPosition = (CardsPosition[i].x * halfWidth * Vector3.right) + (halfHeight * CardsPosition[i].z * Vector3.forward) + CardsPosition[i].y * new Vector3(0f, 1f, 0f);
+            if (selectId == i) cards[i].transform.localPosition += CardsPosition[i].y * new Vector3(0f, 0.5f, 0f);
             cards[i].transform.localRotation = CardsRotation[i];
         }
     }
@@ -132,5 +133,10 @@ public class MajPrefab : MonoBehaviour
             CardsRotation[result.changeList[i]].z = result.rotationz[i];
             CardsRotation[result.changeList[i]].w = result.rotationw[i];
         }
+    }
+    int selectId = -1;
+    public void handleSelect(int id)
+    {
+        selectId = id;
     }
 }
