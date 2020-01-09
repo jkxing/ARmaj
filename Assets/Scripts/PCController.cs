@@ -110,7 +110,8 @@ public class PCController : MonoBehaviour
         playNum = new int[4];
         for (int i = 0; i < 4; ++i) 
         {
-            rank_list[i] = i, score_list[i] = 25000;
+            rank_list[i] = i;
+            score_list[i] = 25000;
         }
         round = -1;
     }
