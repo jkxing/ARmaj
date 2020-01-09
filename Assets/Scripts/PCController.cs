@@ -25,6 +25,9 @@ public class PCController : MonoBehaviour
     public int[] currentCard;
     public bool okPlay = false;
     public int[] playNum;
+    public int[] cardNum;
+    public int pengCard;
+    public int[] fulu;
 
     public float timer = 4f;
     public int cnt = 0;
@@ -46,6 +49,7 @@ public class PCController : MonoBehaviour
     void Start()
     {
         gestureDetect = GestureDetect.Instance;
+        gestureDetect.OnVariableChange += change;
         cards = new GameObject[CARD_NUM];
         CardsPosition = new Vector3[CARD_NUM];
         CardsRotation = new Quaternion[CARD_NUM];
@@ -109,13 +113,15 @@ public class PCController : MonoBehaviour
     {
         handCard = new int[4, 13];
         currentCard = new int[14];
+        cardNum = new int[4];
         playNum = new int[4];
-        for (int i = 0; i < 4; ++i) 
+        for (int i = 0; i < 4; ++i)
         {
             rank_list[i] = i;
             score_list[i] = 25000;
         }
         round = -1;
+        fulu = new int[12];
     }
 
     public void initCard()
@@ -132,13 +138,14 @@ public class PCController : MonoBehaviour
             cardDesk[a] = cardDesk[i];
             cardDesk[i] = t;
         }
-        
+
         playNum[0] = playNum[1] = playNum[2] = playNum[3] = 0;
         for (int i = 0; i < 4; ++i)
         {
             int[] id = new int[13];
             lizhi_state[i] = false;
-            for (int j = 0; j < 13; ++j) id[j] = handCard[i,j] = cardDesk[i * 13 + j];
+            cardNum[i] = 13;
+            for (int j = 0; j < 13; ++j) id[j] = handCard[i, j] = cardDesk[i * 13 + j];
             updateHandCard(i, id);
         }
         front = 53;
@@ -151,21 +158,24 @@ public class PCController : MonoBehaviour
             return;
 
         int lastPlayer = (currentPlayer + 3) % 4;
-        int[] id = new int[13];
-        for (int i = 0; i < 13; ++i) id[i] = handCard[lastPlayer, i];
+        int[] id = new int[cardNum[lastPlayer]];
+        for (int i = 0; i < cardNum[lastPlayer]; ++i) id[i] = handCard[lastPlayer, i];
         updateHandCard(lastPlayer, id);
 
-        for (int i = 0; i < 13; ++i) currentCard[i] = handCard[currentPlayer,i];
-        currentCard[13] = cardDesk[front++];
-        updateHandCard(currentPlayer, currentCard);
-        if (judgeHe(currentCard)) he = true;
+        int[] id1 = new int[cardNum[currentPlayer] + 1];
+        for (int i = 0; i < cardNum[currentPlayer]; ++i) currentCard[i] = id1[i] = handCard[currentPlayer, i];
+        currentCard[cardNum[currentPlayer]] = id1[cardNum[currentPlayer]] = cardDesk[front++];
+        updateHandCard(currentPlayer, id1);
         okPlay = true;
+
+        if (judgeHe(id1)) he = true;
+        else he = false;
     }
 
     public void sortCard()
     {
-        for(int i = 0; i < 13; ++i)
-            for(int j = i; j < 13; ++j)
+        for (int i = 0; i < cardNum[currentPlayer]; ++i)
+            for (int j = i; j < cardNum[currentPlayer]; ++j)
             {
                 if(handCard[currentPlayer, j] < handCard[currentPlayer, i])
                 {
@@ -264,23 +274,112 @@ public class PCController : MonoBehaviour
             }
         return false;
     }
-
-    public void playCard()
+    public bool canChi(int index)
     {
-        if (!okPlay) return;
-        System.Random r1 = new System.Random();
-        int a = r1.Next(0, 14);
-        int index = currentCard[a];
-        for (int i = 0; i < 14; ++i)
-            if (i > a)
-                handCard[currentPlayer, i - 1] = currentCard[i];
-            else if(i<a)
-                handCard[currentPlayer, i] = currentCard[i];
-        sortCard();
-        throwCard(currentPlayer, index ,playNum[currentPlayer]);
-        playNum[currentPlayer]++;
-        currentPlayer = (currentPlayer + 1) % 4;
-        okPlay = false;
+        int[] tong = new int[34];
+        for (int i = 0; i < 34; ++i)
+        {
+            tong[i] = 0;
+        }
+        for (int i = 0; i < 13; ++i)
+        {
+            tong[handCard[0,i] / 4]++;
+        }
+        for (int i = 0; i < 3; ++i)
+        {
+            int l = i * 9, r = (i + 1) * 9;
+            //if(l <= index && index < r && )
+        }
+        return false;
+    }
+    public void change(int newval)
+    {
+        if (newval == 1 && peng)
+        {
+            //pengCard
+            int t = 0;
+
+            for (int i = 0; i < cardNum[0]; ++i)
+                if (handCard[0,i] / 4 == pengCard / 4 && t < 2)
+                {
+                    fulu[13 - cardNum[0]] = handCard[0, i];
+                    ++t;
+                    for (int j = i + 1; j < cardNum[0]; ++j)
+                        handCard[0, j - 1] = j;
+                    --i;
+                    cardNum[0]--;
+
+                }
+            fulu[13 - cardNum[0]] = pengCard;
+            cardNum[0]--;
+
+            int[] id = new int[13 - cardNum[0]];
+            for (int i = 0; i < 13 - cardNum[0]; ++i)
+                id[i] = fulu[i];
+
+            updateFuluCard(0, id);
+
+            int[] _id = new int[cardNum[0]];
+            for (int i = 0; i < cardNum[0]; ++i)
+                _id[i] = handCard[0, i];
+
+            updateHandCard(0, _id);
+
+            okPlay = true;
+            currentPlayer = 0;
+
+
+        }
+        else if (newval == 7 && he)
+        {
+            win = 0;
+        }
+    }
+    public void playCard()
+        {
+            if (!okPlay) return;
+            System.Random r1 = new System.Random();
+            int a = r1.Next(0, cardNum[currentPlayer] + 1);
+            int index = currentCard[a];
+                for (int i = 0; i < cardNum[currentPlayer] + 1; ++i)
+                    if (i > a)
+                        handCard[currentPlayer, i - 1] = currentCard[i];
+                    else if (i < a)
+                        handCard[currentPlayer, i] = currentCard[i];
+            sortCard();
+
+            if (currentPlayer != 0)
+            {
+                int[] id = new int[cardNum[currentPlayer] + 1];
+                for (int i = 0; i < cardNum[currentPlayer]; ++i) id[i] = handCard[0, i];
+                id[cardNum[currentPlayer]] = index;
+                if (judgeHe(id)) he = true;
+                else he = false;
+
+                pengCard = index;
+                int[] tong = new int[34];
+                for (int i = 0; i < 34; ++i)
+                    tong[i] = 0;
+                for (int i = 0; i < cardNum[currentPlayer]; ++i)
+                    tong[handCard[0, i] / 4]++;
+                if (tong[index / 4] >= 2) peng = true;
+                else peng = false;
+                /*
+                if (currentPlayer == 3 && canChi(index))
+                    chi = true;
+                else
+                    chi = false;*/
+            }
+            else
+            {
+                he = false; peng = false;
+            }
+
+            
+            throwCard(currentPlayer, index ,playNum[currentPlayer]);
+            playNum[currentPlayer]++;
+            currentPlayer = (currentPlayer + 1) % 4;
+            okPlay = false;
     }
 
     //player and his handcard
