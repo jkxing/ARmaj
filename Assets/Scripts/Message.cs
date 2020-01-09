@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using static AudioManager;
 
 namespace Multiplay
 {
@@ -49,6 +50,7 @@ namespace Multiplay
     public class AudioInfo
     {
         public int player;
+        public SoundType type;
     }
     [Serializable]
     public class SelectInfo

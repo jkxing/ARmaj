@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static AudioManager;
 
 public class PCController : MonoBehaviour
 {
@@ -373,7 +374,16 @@ public class PCController : MonoBehaviour
         }
         StartCoroutine(_pushCards(player, id, pos, 25));
     }
-
+    public void AudioInfoSend(SoundType s)
+    {
+        AudioInfo x = new AudioInfo();
+        x.type = s;
+        for (int i=0;i<Server.Players.Count;i++)
+        {
+            x.player = i;
+            Server.Players[i].Send(MessageType.AudioInfo, NetworkUtils.Serialize(x));
+        }
+    }
     private IEnumerator _pushCards(int player, int[] id, int[] pos, int tim)
     {
         if (tim == 0)
@@ -381,6 +391,7 @@ public class PCController : MonoBehaviour
             if (Server.Players.Count > player)
             {
                 AudioInfo x = new AudioInfo();
+                x.player = -1;
                 Server.Players[player].Send(MessageType.AudioInfo, NetworkUtils.Serialize(x));
             }
             for (int i = 0; i < id.Length; i++)

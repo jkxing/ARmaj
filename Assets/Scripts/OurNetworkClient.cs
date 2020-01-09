@@ -47,8 +47,15 @@ public class OurNetworkClient : MonoBehaviour
     {
         Info.Instance.Print("audioinfo parse", true);
         AudioInfo result = NetworkUtils.Deserialize<AudioInfo>(data);
-        MajPrefab obj = GameObject.Find("Controller").GetComponent<ARController>().visualizer;
-        obj.table.transform.Find("audio").GetComponent<AudioSource>().Play();
+        if (result.player == -1)
+        {
+            MajPrefab obj = GameObject.Find("Controller").GetComponent<ARController>().visualizer;
+            obj.table.transform.Find("audio").GetComponent<AudioSource>().Play();
+        }
+        else
+        {
+            GameObject.Find("Controller").GetComponent<AudioManager>().PlaySound(result.type, GameObject.Find("Controller"));
+        }
     }
     private void _SelectInfo(byte[] data)
     {
