@@ -37,6 +37,7 @@ public class PCController : MonoBehaviour
     public bool[] lizhi_state;
     public int[] score_list;
     public int[] rank_list;
+    public int win;
     public bool playing;
     public int round;
 
@@ -477,6 +478,7 @@ public class PCController : MonoBehaviour
         x.he = he;
         x.currentPlayer = currentPlayer;
         x.time = time;
+        x.win = win + 1;
         x.rank_list = new int[4];
         x.score_list = new int[4];
         x.lizhi_state = new bool[4];

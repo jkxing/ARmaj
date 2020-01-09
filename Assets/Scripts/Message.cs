@@ -23,6 +23,7 @@ namespace Multiplay
         public int yourPlayer;
         public bool chi,peng,gang,lizhi,he;
         public int time;
+        public int win;
         public int[] rank_list;
         public int[] score_list;
         public bool[] lizhi_state;

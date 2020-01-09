@@ -94,7 +94,7 @@ public class ARController : MonoBehaviour
         }
         FitToScanOverlay.SetActive(true);
     }
-    public GameObject he, lizhi, chi, peng, gang, time_left_box;
+    public GameObject he, lizhi, chi, peng, gang, time_left_box,win;
     public Text[] playerId;
     public Text[] playerScore;
     public Text time_left;
@@ -110,6 +110,16 @@ public class ARController : MonoBehaviour
             gang.SetActive(result.gang);
             time_left_box.SetActive(true);
             time_left.text = result.time.ToString();
+            if (result.win == result.yourPlayer + 1)
+            {
+                win.GetComponent<Text>().text = "win";
+                gameObject.GetComponent<AudioManager>().PlaySound(AudioManager.SoundType.MATCH_COMPLETE, gameObject);
+            }
+            else if(result.win>0)
+            {
+                win.GetComponent<Text>().text = "lose";
+                gameObject.GetComponent<AudioManager>().PlaySound(AudioManager.SoundType.MATCH_COMPLETE, gameObject);
+            }
         }
         for (int i = 0; i < 4; i++)
         {
